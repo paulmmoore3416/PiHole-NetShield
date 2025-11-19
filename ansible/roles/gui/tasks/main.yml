@@ -134,6 +134,14 @@
   args:
     warn: false
 
+- name: Generate self-signed certificate (optional)
+  when: not letsencrypt_enabled and ssl_self_signed
+  shell: |
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout {{ ssl_key_path }} -out {{ ssl_cert_path }} -subj "/C=US/ST=State/L=City/O=PiHole-NetShield/CN={{ gui_domain | default('localhost') }}"
+  args:
+    creates: "{{ ssl_cert_path }}"
+  become: true
+
 - name: Run ansible-playbook for GUI setup
   command: ansible-playbook -i ansible/inventory.example.ini --ask-vault-pass playbook.yml
   become: true

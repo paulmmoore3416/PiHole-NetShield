@@ -82,6 +82,8 @@ letsencrypt_enabled: true
 
 The playbook will create an Nginx site and attempt to run `certbot` to obtain a certificate.
 
+If you do not have a public domain or do not want to use Let's Encrypt, you can enable a self-signed certificate by setting `ssl_self_signed: true`. The playbook will generate a self-signed cert at `{{ ssl_cert_path }}` and configure Nginx accordingly. Note: browsers will show a security warning for self-signed certificates; use this option only on local networks or for testing.
+
    ## Web GUI
 
    PiHole-NetShield provides a simple web GUI for common tasks (start/stop, updates, backups, add blocklists). The GUI runs a small Flask app and is managed by systemd.

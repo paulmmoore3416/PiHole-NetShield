@@ -3,6 +3,9 @@ gui_token: ''
 gui_domain: ''
 certbot_email: ''
 letsencrypt_enabled: false
+ssl_self_signed: false
+ssl_cert_path: /etc/ssl/private/pihole-netshield.crt
+ssl_key_path: /etc/ssl/private/pihole-netshield.key
 features_default:
   blocklist_manager: true
   performance_monitoring: true
