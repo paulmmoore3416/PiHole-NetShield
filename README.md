@@ -95,6 +95,31 @@ If you do not have a public domain or do not want to use Let's Encrypt, you can 
       ```bash
       ansible-playbook -i inventory.example.ini --ask-vault-password ansible/playbook.yml
       ```
+### HTTP Basic Auth (htpasswd)
+
+You can enable basic HTTP auth in Nginx by setting `htpasswd_enabled: true` in `ansible/roles/gui/vars/main.yml` and adding `htpasswd_password` in your `ansible/secrets.yml` file. Ansible will generate `/etc/nginx/.htpasswd` for the configured user and protect the GUI with `auth_basic`.
+
+Example (use `ansible-vault`):
+
+```
+htpasswd_password: "BigBlock2534!"
+htpasswd_user: "paul"
+htpasswd_enabled: true
+```
+
+### Remote NFS backups (Teleporter -> NFS)
+
+To have weekly backups sent to a remote NFS share, set `remote_backup_enabled: true`, `remote_nfs_server` and `remote_nfs_share` in your `ansible/secrets.yml`. This will mount the remote NFS share at `/mnt/pihole-backups` and a weekly cron will run the backup script which rsyncs backups to the mounted share.
+
+```
+remote_backup_enabled: true
+remote_nfs_server: "nfs.example.com"
+remote_nfs_share: "/export/pi-hole-backups"
+```
+
+Notes:
+- This playbook uses NFS. Ensure your remote NFS server permits the Pi's IP and that root mapping is set appropriately.
+- If you prefer secure rsync over SSH instead of NFS, set up an SSH key on the Pi and tweak the script to rsync using user@host:path.
 
    3. Access the UI on the configured port (default 8080):
 
