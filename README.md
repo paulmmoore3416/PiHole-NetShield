@@ -68,6 +68,20 @@ PiHole-NetShield is a comprehensive Raspberry Pi-hole project designed to block 
    ansible-playbook -i inventory.ini ansible/playbook.yml
    ```
 
+### SSL / Nginx & Let's Encrypt
+
+If you want to secure the GUI over HTTPS using a public domain name, set `gui_domain` and `certbot_email` in an encrypted `ansible/secrets.yml` and set `letsencrypt_enabled: true`. This requires a domain that resolves to the Pi's public IP (or a port-forward) and is not suitable for an unexposed LAN-only machine.
+
+Example (use `ansible-vault`):
+
+```
+gui_domain: "pi.example.com"
+certbot_email: "paulmmoore3416@gmail.com"
+letsencrypt_enabled: true
+```
+
+The playbook will create an Nginx site and attempt to run `certbot` to obtain a certificate.
+
    ## Web GUI
 
    PiHole-NetShield provides a simple web GUI for common tasks (start/stop, updates, backups, add blocklists). The GUI runs a small Flask app and is managed by systemd.
