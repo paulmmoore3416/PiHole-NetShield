@@ -1,0 +1,12 @@
+[Unit]
+Description=Pi-hole DNS Server
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/pihole-FTL
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

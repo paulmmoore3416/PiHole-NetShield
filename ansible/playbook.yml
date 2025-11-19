@@ -1,0 +1,27 @@
+---
+- name: Deploy PiHole-NetShield
+  hosts: pihole
+  become: yes
+  vars:
+    pihole_admin_password: "{{ pihole_password }}"
+    ansible_user: paul
+    ansible_ssh_pass: BigBlock2534!
+    ansible_become_pass: BigBlock2534!
+
+  roles:
+    - pihole
+    - enhancements
+
+  pre_tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+      become: yes
+
+  post_tasks:
+    - name: Ensure Pi-hole service is running and enabled
+      systemd:
+        name: pihole-FTL
+        state: started
+        enabled: yes
+      become: yes
