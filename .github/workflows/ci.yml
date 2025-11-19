@@ -20,6 +20,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
     - name: Test scripts
       run: |
         find scripts/ -name "*.sh" -exec bash -n {} \;
+    - name: Install dev requirements
+      run: |
+        pip install -r gui/requirements-dev.txt
+    - name: Run Flask unit tests
+      run: |
+        pytest gui/tests -q

@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for
 import subprocess
 import os
 import shlex
+import json
 
 app = Flask(__name__)
 
@@ -59,7 +60,7 @@ def api_update():
     if not check_token(request):
         return jsonify({'error': 'unauthorized'}), 401
     # run the update script that was created earlier
-    cmd = ['/usr/local/bin/auto_update.sh']
+    cmd = ['sudo', '/usr/local/bin/auto_update.sh']
     proc = subprocess.run(cmd, capture_output=True, text=True)
     return jsonify({'ok': proc.returncode == 0, 'stdout': proc.stdout, 'stderr': proc.stderr})
 
@@ -67,7 +68,7 @@ def api_update():
 def api_backup():
     if not check_token(request):
         return jsonify({'error': 'unauthorized'}), 401
-    cmd = ['/usr/local/bin/backup_restore.sh', 'backup']
+    cmd = ['sudo', '/usr/local/bin/backup_restore.sh', 'backup']
     proc = subprocess.run(cmd, capture_output=True, text=True)
     return jsonify({'ok': proc.returncode == 0, 'stdout': proc.stdout, 'stderr': proc.stderr})
 
@@ -80,7 +81,7 @@ def api_add_blocklist():
     name = data.get('name')
     if not url or not name:
         return jsonify({'error': 'url and name are required'}), 400
-    cmd = ['/usr/local/bin/custom_blocklist_manager.sh', 'add', url, name]
+    cmd = ['sudo', '/usr/local/bin/custom_blocklist_manager.sh', 'add', url, name]
     proc = subprocess.run(cmd, capture_output=True, text=True)
     return jsonify({'ok': proc.returncode == 0, 'stdout': proc.stdout, 'stderr': proc.stderr})
 
@@ -88,7 +89,7 @@ def api_add_blocklist():
 def api_update_blocklists():
     if not check_token(request):
         return jsonify({'error': 'unauthorized'}), 401
-    cmd = ['/usr/local/bin/custom_blocklist_manager.sh', 'update']
+    cmd = ['sudo', '/usr/local/bin/custom_blocklist_manager.sh', 'update']
     proc = subprocess.run(cmd, capture_output=True, text=True)
     return jsonify({'ok': proc.returncode == 0, 'stdout': proc.stdout, 'stderr': proc.stderr})
 
@@ -120,6 +121,37 @@ def api_stats():
     proc = subprocess.run(cmd, capture_output=True, text=True)
     return jsonify({'ok': proc.returncode == 0, 'json': proc.stdout})
 
+
+@app.route('/api/features', methods=['GET', 'POST'])
+def api_features():
+    if not check_token(request):
+        return jsonify({'error': 'unauthorized'}), 401
+
+    features_path = os.environ.get('FEATURES_PATH', '/etc/pihole-netshield/features.json')
+
+    def read_features():
+        try:
+            with open(features_path, 'r') as fh:
+                return json.load(fh)
+        except Exception:
+            return {}
+
+    if request.method == 'GET':
+        features = read_features()
+        return jsonify({'ok': True, 'features': features})
+
+    # POST - update feature flags
+    data = request.json or {}
+    # validate keys
+    features = read_features()
+    features.update({k: bool(v) for k, v in data.items()})
+    try:
+        with open(features_path, 'w') as fh:
+            json.dump(features, fh, indent=2)
+        return jsonify({'ok': True, 'features': features})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 # Helpers
 
 def _has_pihole():
@@ -138,7 +170,8 @@ def _pihole_status():
 
 
 def _systemctl(action, service):
-    cmd = ['systemctl', action, service]
+    # Use sudo to run systemctl because the GUI runs as a less-privileged user
+    cmd = ['sudo', 'systemctl', action, service]
     proc = subprocess.run(cmd, capture_output=True, text=True)
     return {'rc': proc.returncode, 'stdout': proc.stdout, 'stderr': proc.stderr}
 

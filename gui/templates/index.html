@@ -50,6 +50,12 @@
 
       <hr>
 
+      <h3>Features</h3>
+      <div id="featuresArea" class="mb-3"></div>
+      <button id="saveFeaturesBtn" class="btn btn-sm btn-primary">Save Features</button>
+
+      <hr>
+
       <h3>Logs</h3>
       <div>
         <button id="ftlLogsBtn" class="btn btn-sm btn-info">FTL Warnings (last 6 hours)</button>
@@ -122,6 +128,29 @@
         const r = await request('/api/ftl-errors');
         document.getElementById('output').textContent = r.output || JSON.stringify(r, null, 2);
       }
+
+      async function fetchFeatures() {
+        const r = await request('/api/features');
+        if (r.ok && r.features) {
+          const container = document.getElementById('featuresArea');
+          container.innerHTML = '';
+          for (const [k, v] of Object.entries(r.features)) {
+            const id = 'f_' + k;
+            container.innerHTML += `<div class="form-check"><input class="form-check-input" type="checkbox" value="" id="${id}" ${v ? 'checked' : ''}><label class="form-check-label" for="${id}">${k}</label></div>`;
+          }
+        }
+      }
+
+      document.getElementById('saveFeaturesBtn').onclick = async () =&gt; {
+        const container = document.getElementById('featuresArea');
+        const inputs = container.querySelectorAll('input[type=checkbox]');
+        const payload = {};
+        inputs.forEach(i =&gt; { payload[i.id.substr(2)] = i.checked; });
+        const r = await request('/api/features', {method:'POST', headers:{'Content-Type': 'application/json'}, body: JSON.stringify(payload)});
+        document.getElementById('output').textContent = JSON.stringify(r, null, 2);
+      }
+
+      fetchFeatures();
     </script>
   </body>
 </html>

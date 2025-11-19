@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
-User=root
+User=pihole-gui
 WorkingDirectory=/opt/pihole-netshield-gui/gui
 Environment=GUI_PORT={{ gui_port | default(8080) }}
 Environment=GUI_TOKEN={{ gui_token | default('') }}

@@ -1,2 +1,5 @@
 gui_port: 8080
 gui_token: ''
+gui_domain: ''
+certbot_email: ''
+letsencrypt_enabled: false

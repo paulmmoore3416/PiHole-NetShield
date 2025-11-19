@@ -59,3 +59,81 @@
     enabled: true
     state: started
   become: true
+
+- name: Create sudoers for pihole-gui to manage pihole services and scripts
+  copy:
+    dest: /etc/sudoers.d/pihole-gui
+    content: |
+      pihole-gui ALL=(ALL) NOPASSWD: /bin/systemctl start pihole-FTL, /bin/systemctl stop pihole-FTL, /bin/systemctl restart pihole-FTL, /usr/local/bin/backup_restore.sh, /usr/local/bin/auto_update.sh, /usr/local/bin/custom_blocklist_manager.sh
+    owner: root
+    group: root
+    mode: '0440'
+  become: true
+
+- name: Create features config directory
+  file:
+    path: /etc/pihole-netshield
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+
+- name: Deploy default feature flags
+  template:
+    src: features.j2
+    dest: /etc/pihole-netshield/features.json
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+
+- name: Install certbot for Let's Encrypt (optional)
+  apt:
+    name:
+      - certbot
+      - python3-certbot-nginx
+    state: present
+  become: true
+
+- name: Create webroot for certbot
+  file:
+    path: /var/www/certbot
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+
+- name: Create nginx site for GUI
+  template:
+    src: nginx-pihole.conf.j2
+    dest: /etc/nginx/sites-available/pihole-netshield
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - reload nginx
+  become: true
+
+- name: Enable nginx site
+  file:
+    src: /etc/nginx/sites-available/pihole-netshield
+    dest: /etc/nginx/sites-enabled/pihole-netshield
+    state: link
+  notify:
+    - reload nginx
+  become: true
+
+- name: Obtain or renew Let's Encrypt certificate (optional)
+  become: true
+  shell: |
+    if [ "{{ letsencrypt_enabled | default(false) }}" = "true" ] && [ -n "{{ gui_domain | default('') }}" ]; then
+      certbot --nginx --non-interactive --agree-tos -m {{ certbot_email | default('') }} -d {{ gui_domain }}
+    fi
+  args:
+    warn: false
+
+- name: Run ansible-playbook for GUI setup
+  command: ansible-playbook -i ansible/inventory.example.ini --ask-vault-pass playbook.yml
+  become: true
