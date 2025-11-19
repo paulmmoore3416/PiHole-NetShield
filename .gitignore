@@ -1,0 +1,6 @@
+# Ignore Ansible secret vars
+ansible/secrets.yml
+
+# Ignore Python virtual env
+/opt/pihole-netshield-gui/venv
+venv/

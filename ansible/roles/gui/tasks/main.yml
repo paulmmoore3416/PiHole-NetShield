@@ -1,0 +1,61 @@
+---
+- name: Install GUI dependencies
+  apt:
+    name:
+      - python3-pip
+      - python3-venv
+      - nginx
+      - git
+    state: present
+  become: true
+
+- name: Create gui user
+  user:
+    name: pihole-gui
+    comment: "PiHole NetShield GUI user"
+    home: /opt/pihole-netshield-gui
+    shell: /bin/bash
+    system: true
+  become: true
+
+- name: Ensure GUI directory exists
+  file:
+    path: /opt/pihole-netshield-gui
+    state: directory
+    owner: pihole-gui
+    group: pihole-gui
+    mode: '0755'
+  become: true
+
+- name: Copy GUI files
+  copy:
+    src: gui/
+    dest: /opt/pihole-netshield-gui/
+    owner: pihole-gui
+    group: pihole-gui
+    mode: '0755'
+  become: true
+
+- name: Install Python requirements
+  pip:
+    requirements: /opt/pihole-netshield-gui/gui/requirements.txt
+    virtualenv: /opt/pihole-netshield-gui/venv
+    virtualenv_command: /usr/bin/python3 -m venv
+    virtualenv_site_packages: false
+  become: true
+
+- name: Create systemd unit for GUI
+  template:
+    src: pi-gui.service.j2
+    dest: /etc/systemd/system/pihole-netshield-gui.service
+    mode: '0644'
+  notify:
+    - daemon-reload
+  become: true
+
+- name: Ensure GUI is enabled and started
+  systemd:
+    name: pihole-netshield-gui
+    enabled: true
+    state: started
+  become: true

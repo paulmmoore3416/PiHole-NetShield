@@ -68,6 +68,26 @@ PiHole-NetShield is a comprehensive Raspberry Pi-hole project designed to block 
    ansible-playbook -i inventory.ini ansible/playbook.yml
    ```
 
+   ## Web GUI
+
+   PiHole-NetShield provides a simple web GUI for common tasks (start/stop, updates, backups, add blocklists). The GUI runs a small Flask app and is managed by systemd.
+
+   1. Secure the GUI by creating an Ansible Vault file for secrets (use the example in `ansible/secrets-example.yml`). Add `gui_token` to the vault and/or configure your reverse proxy.
+
+   2. Run the role:
+
+      ```bash
+      ansible-playbook -i inventory.example.ini --ask-vault-password ansible/playbook.yml
+      ```
+
+   3. Access the UI on the configured port (default 8080):
+
+      http://raspberrypi:8080
+
+   4. Use the token (if configured) by sending Authorization header: `Authorization: Bearer <your_token>` or set it in the env via Ansible.
+
+   Security note: This GUI can execute commands with system privileges and is intended for local network-managed devices only; do not expose without robust authentication and TLS.
+
 ## Project Structure
 
 ```

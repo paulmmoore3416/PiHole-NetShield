@@ -1,0 +1,16 @@
+[Unit]
+Description=PiHole-NetShield GUI
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/pihole-netshield-gui/gui
+Environment=GUI_PORT={{ gui_port | default(8080) }}
+Environment=GUI_TOKEN={{ gui_token | default('') }}
+ExecStart=/opt/pihole-netshield-gui/venv/bin/python3 app.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
