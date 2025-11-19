@@ -46,6 +46,29 @@
             </form>
           </div>
         </div>
+
+          <div class="row mt-3">
+            <div class="col-md-6">
+              <h3>Local DNS Records</h3>
+              <form id="localDnsForm">
+                <div class="mb-2">
+                  <input name="ip" placeholder="IP (e.g., 192.168.1.2)" class="form-control" required>
+                </div>
+                <div class="mb-2">
+                  <input name="hostname" placeholder="Hostname (e.g., nas.local)" class="form-control" required>
+                </div>
+                <button class="btn btn-primary">Add Record</button>
+              </form>
+              <div class="mt-2"><button id="listLocalDnsBtn" class="btn btn-sm btn-outline-secondary">List Local Records</button></div>
+            </div>
+            <div class="col-md-6">
+              <h3>Backups & Teleporter</h3>
+              <div class="mb-2">
+                <button id="exportBackupBtn" class="btn btn-outline-primary">Create Backup Now</button>
+                <button id="rsyncBackupBtn" class="btn btn-outline-info">Rsync Backup to Remote</button>
+              </div>
+            </div>
+          </div>
       </div>
 
       <hr>
@@ -122,6 +145,30 @@
       document.getElementById('viewLogsBtn').onclick = async () => {
         const r = await request('/api/logs');
         document.getElementById('output').textContent = r.output || JSON.stringify(r, null, 2);
+      }
+
+      document.getElementById('localDnsForm').onsubmit = async (evt) => {
+        evt.preventDefault();
+        const fd = new FormData(evt.target);
+        const ip = fd.get('ip');
+        const name = fd.get('hostname');
+        const r = await request('/api/localdns', {method: 'POST', headers:{'Content-Type': 'application/json'}, body: JSON.stringify({ip, name})});
+        document.getElementById('output').textContent = JSON.stringify(r, null, 2);
+      }
+
+      document.getElementById('listLocalDnsBtn').onclick = async () => {
+        const r = await request('/api/localdns');
+        document.getElementById('output').textContent = r.output || JSON.stringify(r, null, 2);
+      }
+
+      document.getElementById('exportBackupBtn').onclick = async () => {
+        const r = await request('/api/backup', { method: 'POST' });
+        document.getElementById('output').textContent = JSON.stringify(r, null, 2);
+      }
+
+      document.getElementById('rsyncBackupBtn').onclick = async () => {
+        const r = await request('/api/rsync-backup', { method: 'POST' });
+        document.getElementById('output').textContent = JSON.stringify(r, null, 2);
       }
 
       document.getElementById('ftlLogsBtn').onclick = async () => {

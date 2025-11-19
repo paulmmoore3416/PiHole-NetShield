@@ -9,62 +9,62 @@
       - logrotate
       - cron
     state: present
-  become: yes
+  become: true
 
 - name: Create custom blocklist directory
   file:
     path: /etc/pihole/custom-blocklists
     state: directory
-  become: yes
+  become: true
 
 - name: Copy custom blocklist script
   copy:
     src: custom_blocklist_manager.sh
     dest: /usr/local/bin/custom_blocklist_manager.sh
     mode: '0755'
-  become: yes
+  become: true
 
 - name: Copy performance monitoring script
   copy:
     src: performance_monitor.sh
     dest: /usr/local/bin/performance_monitor.sh
     mode: '0755'
-  become: yes
+  become: true
 
 - name: Copy auto update script
   copy:
     src: auto_update.sh
     dest: /usr/local/bin/auto_update.sh
     mode: '0755'
-  become: yes
+  become: true
 
 - name: Copy backup script
   copy:
     src: backup_restore.sh
     dest: /usr/local/bin/backup_restore.sh
     mode: '0755'
-  become: yes
+  become: true
 
 - name: Copy network analyzer script
   copy:
     src: network_analyzer.sh
     dest: /usr/local/bin/network_analyzer.sh
     mode: '0755'
-  become: yes
+  become: true
 
 - name: Copy IoT isolation script
   copy:
     src: iot_isolation.sh
     dest: /usr/local/bin/iot_isolation.sh
     mode: '0755'
-  become: yes
+  become: true
 
 - name: Copy VPN integration script
   copy:
     src: vpn_integration.sh
     dest: /usr/local/bin/vpn_integration.sh
     mode: '0755'
-  become: yes
+  become: true
 
 - name: Copy log analysis script
   copy:
@@ -72,6 +72,13 @@
     dest: /usr/local/bin/log_analysis.sh
     mode: '0755'
   become: yes
+
+- name: Copy local DNS management script
+  copy:
+    src: ../../../scripts/local_dns.sh
+    dest: /usr/local/bin/local_dns.sh
+    mode: '0755'
+  become: true
 
 - name: Set up cron jobs for enhancements
   cron:
@@ -93,7 +100,7 @@
       minute: "0"
       hour: "3"
       job: "/usr/local/bin/backup_restore.sh backup"
-  become: yes
+  become: true
 
 - name: Configure logrotate for Pi-hole logs
   template:

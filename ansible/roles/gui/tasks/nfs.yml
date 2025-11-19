@@ -1,0 +1,26 @@
+---
+- name: Install nfs-common for NFS mounts
+  apt:
+    name: nfs-common
+    state: present
+  become: true
+
+- name: Create remote backup mount directory
+  file:
+    path: "{{ remote_backup_mount }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+
+- name: Add NFS fstab entry
+  mount:
+    path: "{{ remote_backup_mount }}"
+    src: "{{ remote_nfs_server }}:{{ remote_nfs_share }}"
+    fstype: nfs
+    opts: rw
+    state: mounted
+  when: remote_backup_enabled and remote_nfs_server != '' and remote_nfs_share != ''
+  become: true
+*** End Patch

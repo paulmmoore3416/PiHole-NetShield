@@ -1,0 +1,11 @@
+---
+- name: Ensure cron job for weekly backup to NFS exists
+  cron:
+    name: "Pihole weekly backup to remote"
+    minute: "0"
+    hour: "3"
+    weekday: "0"
+    user: root
+    job: "/usr/local/bin/backup_restore.sh backup"
+  when: remote_backup_enabled
+  become: true

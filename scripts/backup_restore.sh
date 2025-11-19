@@ -12,6 +12,11 @@ backup() {
     mkdir -p "$BACKUP_DIR"
     tar -czf "$BACKUP_DIR/pihole_backup_$TIMESTAMP.tar.gz" /etc/pihole /etc/dnsmasq.d /var/log/pihole* 2>/dev/null
     echo "Backup created: $BACKUP_DIR/pihole_backup_$TIMESTAMP.tar.gz"
+    # If remote NFS is mounted, rsync the backup
+    if mountpoint -q /mnt/pihole-backups; then
+        rsync -av "$BACKUP_DIR/pihole_backup_$TIMESTAMP.tar.gz" /mnt/pihole-backups/
+        echo "Backup rsynced to /mnt/pihole-backups/"
+    fi
 }
 
 # Function to restore from backup

@@ -6,6 +6,7 @@
       - python3-venv
       - nginx
       - git
+      - apache2-utils
     state: present
   become: true
 
@@ -60,11 +61,30 @@
     state: started
   become: true
 
+- name: Configure htpasswd for Nginx (optional)
+  import_tasks: htpasswd.yml
+  when: htpasswd_enabled
+
+- name: Configure and mount remote NFS backup (optional)
+  import_tasks: nfs.yml
+  when: remote_backup_enabled
+
+- name: Ensure scheduled weekly backup if remote backup enabled
+  import_tasks: backup_schedule.yml
+  when: remote_backup_enabled
+
 - name: Create sudoers for pihole-gui to manage pihole services and scripts
   copy:
     dest: /etc/sudoers.d/pihole-gui
     content: |
-      pihole-gui ALL=(ALL) NOPASSWD: /bin/systemctl start pihole-FTL, /bin/systemctl stop pihole-FTL, /bin/systemctl restart pihole-FTL, /usr/local/bin/backup_restore.sh, /usr/local/bin/auto_update.sh, /usr/local/bin/custom_blocklist_manager.sh
+      pihole-gui ALL=(ALL) NOPASSWD: \
+        /bin/systemctl start pihole-FTL, \
+        /bin/systemctl stop pihole-FTL, \
+        /bin/systemctl restart pihole-FTL, \
+        /usr/local/bin/backup_restore.sh, \
+        /usr/local/bin/auto_update.sh, \
+        /usr/local/bin/custom_blocklist_manager.sh, \
+        /usr/local/bin/local_dns.sh
     owner: root
     group: root
     mode: '0440'
@@ -107,7 +127,7 @@
 
 - name: Create nginx site for GUI
   template:
-    src: nginx-pihole.conf.j2
+    src: "{{ 'nginx-pihole-auth.conf.j2' if htpasswd_enabled else 'nginx-pihole.conf.j2' }}"
     dest: /etc/nginx/sites-available/pihole-netshield
     owner: root
     group: root

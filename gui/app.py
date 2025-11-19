@@ -93,6 +93,44 @@ def api_update_blocklists():
     proc = subprocess.run(cmd, capture_output=True, text=True)
     return jsonify({'ok': proc.returncode == 0, 'stdout': proc.stdout, 'stderr': proc.stderr})
 
+
+@app.route('/api/localdns', methods=['GET', 'POST', 'DELETE'])
+def api_localdns():
+    if not check_token(request):
+        return jsonify({'error': 'unauthorized'}), 401
+
+    path = '/usr/local/bin/local_dns.sh'
+    if request.method == 'GET':
+        proc = subprocess.run([path, 'list'], capture_output=True, text=True)
+        return jsonify({'ok': proc.returncode == 0, 'output': proc.stdout})
+
+    if request.method == 'POST':
+        data = request.json or {}
+        ip = data.get('ip')
+        name = data.get('name')
+        if not ip or not name:
+            return jsonify({'error': 'ip and name required'}), 400
+        proc = subprocess.run(['sudo', path, 'add', ip, name], capture_output=True, text=True)
+        return jsonify({'ok': proc.returncode == 0, 'stdout': proc.stdout, 'stderr': proc.stderr})
+
+    if request.method == 'DELETE':
+        data = request.json or {}
+        name = data.get('name')
+        if not name:
+            return jsonify({'error': 'name required'}), 400
+        proc = subprocess.run(['sudo', path, 'remove', name], capture_output=True, text=True)
+        return jsonify({'ok': proc.returncode == 0, 'stdout': proc.stdout, 'stderr': proc.stderr})
+
+
+@app.route('/api/rsync-backup', methods=['POST'])
+def api_rsync_backup():
+    if not check_token(request):
+        return jsonify({'error': 'unauthorized'}), 401
+    # This triggers the backup script, which will rsync if the NFS mount exists
+    cmd = ['sudo', '/usr/local/bin/backup_restore.sh', 'backup']
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    return jsonify({'ok': proc.returncode == 0, 'stdout': proc.stdout, 'stderr': proc.stderr})
+
 @app.route('/api/logs')
 def api_logs():
     if not check_token(request):

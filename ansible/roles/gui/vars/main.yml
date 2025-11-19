@@ -15,3 +15,15 @@ features_default:
   iot_isolation: true
   vpn_integration: false
   log_analysis: true
+
+# HTTP auth
+htpasswd_enabled: false
+htpasswd_user: paul
+htpasswd_password: ''
+
+# Remote NFS backup
+remote_nfs_server: ''
+remote_nfs_share: ''
+remote_backup_mount: /mnt/pihole-backups
+remote_backup_enabled: false
+remote_backup_schedule: '0 3 * * 0'
