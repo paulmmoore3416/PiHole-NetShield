@@ -1,10 +1,10 @@
 {
-  "blocklist_manager": true,
-  "performance_monitoring": true,
-  "auto_update": true,
-  "backup_restore": true,
-  "network_analyzer": true,
-  "iot_isolation": true,
-  "vpn_integration": false,
-  "log_analysis": true
+  "blocklist_manager": {{ features_default.blocklist_manager | default(true) | to_json }},
+  "performance_monitoring": {{ features_default.performance_monitoring | default(true) | to_json }},
+  "auto_update": {{ features_default.auto_update | default(true) | to_json }},
+  "backup_restore": {{ features_default.backup_restore | default(true) | to_json }},
+  "network_analyzer": {{ features_default.network_analyzer | default(true) | to_json }},
+  "iot_isolation": {{ features_default.iot_isolation | default(true) | to_json }},
+  "vpn_integration": {{ features_default.vpn_integration | default(false) | to_json }},
+  "log_analysis": {{ features_default.log_analysis | default(true) | to_json }}
 }

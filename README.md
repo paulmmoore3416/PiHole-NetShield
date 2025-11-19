@@ -100,6 +100,10 @@ The playbook will create an Nginx site and attempt to run `certbot` to obtain a 
 
    4. Use the token (if configured) by sending Authorization header: `Authorization: Bearer <your_token>` or set it in the env via Ansible.
 
+   ### Feature Flags
+
+   You can enable/disable enhancements from the GUI using the "Features" panel. Changes are persisted to `/etc/pihole-netshield/features.json` on the Pi. To manage feature defaults through Ansible, update the `features_default` variable in `ansible/roles/gui/vars/main.yml` and run the playbook again.
+
    Security note: This GUI can execute commands with system privileges and is intended for local network-managed devices only; do not expose without robust authentication and TLS.
 
 ## Project Structure
